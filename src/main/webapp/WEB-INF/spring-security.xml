@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+	xmlns:util="http://www.springframework.org/schema/util"
+
+	xmlns:aop="http://www.springframework.org/schema/aop"
+
+	xmlns:sec="http://www.springframework.org/schema/security"
+
+	xsi:schemaLocation="
+
+           http://www.springframework.org/schema/beans
+
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+
+           http://www.springframework.org/schema/util
+
+           http://www.springframework.org/schema/util/spring-util.xsd
+
+           http://www.springframework.org/schema/aop
+
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+
+           http://www.springframework.org/schema/security
+
+           http://www.springframework.org/schema/security/spring-security.xsd">
+    <sec:http pattern="/api" security="none" />
+	<sec:http pattern="/users" entry-point-ref="restAuthenticationEntryPoint" create-session="stateless">
+		<sec:csrf disabled = "true" />
+		<sec:custom-filter before="FORM_LOGIN_FILTER" ref="jwtAuthenticationFilter" />
+	</sec:http>	
+	
+	<bean id="restAuthenticationEntryPoint" class="com.security.RestAuthenticationEntryPoint" />
+
+    <bean id="jwtAuthenticationFilter" class="com.security.JwtAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationSuccessHandler" ref="jwtAuthenticationSuccessHandler" />
+    </bean>	
+    
+    <bean id="jwtAuthenticationSuccessHandler" class="com.security.JwtAuthenticationSuccessHandler" />
+    
+    <bean id="jwtUtil" class="com.security.JwtUtil" />
+
+    <sec:authentication-manager alias="authenticationManager">
+				<sec:authentication-provider ref="jwtProvider" >
+				</sec:authentication-provider>
+    </sec:authentication-manager>
+    <bean id="jwtProvider" class="com.security.JwtProvider" >
+    	<property name="jwtUtil" ref="jwtUtil"></property>
+    </bean>
+    	
+</beans>
